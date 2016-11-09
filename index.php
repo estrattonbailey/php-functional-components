@@ -1,81 +1,43 @@
 <?php
+require 'lib/h0.php';
 
-function attrs($props){
-  $output = '';
+require 'elements/index.php';
+require 'components/index.php';
 
-  foreach($props as $attr => $val){
-    $output .= $output."$attr='$val' ";
-  }
+use element\button as button;
 
-  return $output;
-}
+echo button\primary([
+  'class'=>'mt1 pt05',
+  'onclick'=>'console.log(event)'
+])(
+  h('span')(['class'=>'italic'])('Click Me!')
+);
 
-function isArray($arg){
-  return 'array' === gettype($arg);
-}
+exit;
 
-function isProps( $arr ){
-  $firstVal = array_values($arr)[0];
+$arr = [
+  'Book Title One',
+  'Book Title Two'
+];
 
-  return isArray($arr) 
-    && 'string' === gettype($firstVal)
-    && !preg_match("/<\/|\/>/", $firstVal);
-}
+$table = function( $children ){
+  return h('table')(['class'=>'wrapper__table'])(
+    h('thead')(
+      h('tr')( $children )
+    )
+  );
+};
 
-function createElement( $tag, $props = false ){
-  return function( $args = '' ) use( $tag, $props ){
-    if (isArray($args) && isProps($args)){
-      $newArgs = array_merge($props, $args);
-
-      return createElement($tag, $newArgs);
-    } else {
-      $attrs = $props ? attrs($props) : '';
-      $children = '';
-
-      if (isArray($args)){
-        foreach($args as $index => $child){
-          $children .= $child;
-        } 
-      } else {
-        $children = $args;
-      }
-
-      return "<{$tag} {$attrs}>{$children}</${tag}>";
-    }
-  };
-}
-
-function h( $tag ){
-  return function( $args ) use ( $tag ) {
-    if (isArray($args) && isProps($args)) {
-      return createElement( $tag, $args );
-    } else {
-      return createElement( $tag )( $args );
-    }
-  };
-}
-
-$h1 = h('h1');
-$p = h('p');
-
-$hero_content = h('div')([
-  'style' => "
-    position: absolute;
-    width: 40%;
-    height: 200px;
-    top: 0; left: 0; right: 0; bottom: 0;
-    margin: auto;
-  "
-])([
-  $h1('This is a hero'),
-  $p('This is paragraph text')
+echo component\container\large([
+  component\cta('This is text content', 'Click Me'),
+  array_reduce($arr, function($return, $data){
+    $return .= h('p')(['style'=>'block'])($data);
+    return $return;
+  }, ''),
+  $table([
+    h('td')('tabular content'),
+    h('td')('tabular content'),
+    h('td')('tabular content'),
+    h('td')('tabular content'),
+  ])
 ]);
-
-$hero = h('section')([
-  'style' => '
-    height: 100vh;
-    background: whitesmoke;
-  '
-])($hero_content);
-
-echo $hero;
